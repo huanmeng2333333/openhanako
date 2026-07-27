@@ -1,5 +1,5 @@
 {
-  "name": "hanako",
+  "name": "ngng",
   "version": "0.421.24",
   "type": "module",
   "description": "HanaAgent - a personal AI agent with memory and soul",
@@ -136,8 +136,8 @@
     "vitest": "^4.0.18"
   },
   "build": {
-    "appId": "com.hanako.app",
-    "productName": "HanaAgent",
+    "appId": "com.ngng.app",
+    "productName": "ngng",
     "asar": true,
     "npmRebuild": false,
     "afterPack": "./scripts/fix-modules.cjs",
@@ -222,7 +222,7 @@
     "win": {
       "target": "nsis",
       "icon": "desktop/src/icon.ico",
-      "executableName": "HanaAgent",
+      "executableName": "ngng",
       "artifactName": "${productName}-${version}-Windows-${arch}.${ext}",
       "requestedExecutionLevel": "asInvoker",
       "extraResources": [
@@ -239,7 +239,7 @@
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": false,
-      "shortcutName": "HanaAgent",
+      "shortcutName": "ngng",
       "include": "build/installer.nsh",
       "installerIcon": "desktop/src/icon.ico",
       "uninstallerIcon": "desktop/src/icon.ico"
