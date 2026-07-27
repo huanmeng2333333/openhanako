@@ -633,6 +633,7 @@ export async function packDualKindSeed({
     verifyManifest(fs.readFileSync(manifestPath), fs.readFileSync(sigPath), keyset);
   } else {
     console.warn("[build-server] WARNING: Skipping manifest signing (unsigned dev build).");
+    sigPath = null;
   }
 
   log(`[build-server] seed: ${serverPack.archiveName} + ${rendererPackShared.archiveName} + ${manifestFileName}(.sig) → ${artifactOutDir}`);
