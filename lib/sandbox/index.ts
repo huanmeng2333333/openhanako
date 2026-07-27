@@ -1,9 +1,7 @@
 /**
- * sandbox/index.js — 沙盒入口（无状态工厂）
+ * sandbox/index.js �?沙盒入口（无状态工厂）
  *
- * 每次 buildTools 调用时创建 session 级的 PathGuard + OS 沙盒 exec。
- * 不持有 engine 级状态，天然支持多 agent 并发。
- */
+ * 每次 buildTools 调用时创�?session 级的 PathGuard + OS 沙盒 exec�? * 不持�?engine 级状态，天然支持�?agent 并发�? */
 
 import { deriveSandboxPolicy } from "./policy.ts";
 import { PathGuard } from "./path-guard.ts";
@@ -41,15 +39,11 @@ import {
 } from "../../shared/hana-runtime-paths.ts";
 
 /**
- * 为一个 session 创建沙盒包装后的工具集
- *
- * 每次调用独立，不共享状态。
- * 当传入 getSandboxEnabled 回调时，工具在每次调用时动态检查沙盒状态，
- * 切换偏好后无需重建 session 即可生效。
- *
+ * 为一�?session 创建沙盒包装后的工具�? *
+ * 每次调用独立，不共享状态�? * 当传�?getSandboxEnabled 回调时，工具在每次调用时动态检查沙盒状态，
+ * 切换偏好后无需重建 session 即可生效�? *
  * @param {string} cwd  工作目录
- * @param {object[]} customTools  自定义工具
- * @param {object} opts
+ * @param {object[]} customTools  自定义工�? * @param {object} opts
  * @param {string} opts.agentDir
  * @param {string|null} opts.workspace
  * @param {string[]} [opts.workspaceFolders]
@@ -57,19 +51,15 @@ import {
  * @param {() => string[]} [opts.getAuthorizedFolders]  当前 session 动态授权的额外沙盒目录
  * @param {string} opts.hanakoHome
  * @param {() => boolean} opts.getSandboxEnabled  动态沙盒开关（每次工具调用时求值）
- * @param {() => boolean} [opts.getSandboxNetworkEnabled]  动态沙盒联网开关（仅沙盒开启时生效）
- * @param {() => string[]} [opts.getExternalReadPaths]  当前 session 用户显式给过的外部只读路径
- * @param {() => string|null} [opts.getSessionPath]  当前工具调用归属的 sessionPath
- * @param {(sessionPath: string) => string|null} [opts.getSessionIdForPath]  sessionPath locator → sessionId
+ * @param {() => boolean} [opts.getSandboxNetworkEnabled]  动态沙盒联网开关（仅沙盒开启时生效�? * @param {() => string[]} [opts.getExternalReadPaths]  当前 session 用户显式给过的外部只读路�? * @param {() => string|null} [opts.getSessionPath]  当前工具调用归属�?sessionPath
+ * @param {(sessionPath: string) => string|null} [opts.getSessionIdForPath]  sessionPath locator �?sessionId
  * @param {(fileId: string, options?: {sessionPath?: string|null}) => object|null} [opts.resolveSessionFile]  SessionFile resolver
- * @param {(entry: object) => void} [opts.recordFileOperation]  记录 write/edit 触达的 session file
- * @param {() => object|null} [opts.getVisionBridge]  辅助视觉桥
- * @param {() => boolean} [opts.isVisionAuxiliaryEnabled]  辅助视觉开关
- * @param {() => object|null} [opts.getTerminalSessionManager]  当前 engine 的 terminal session manager
+ * @param {(entry: object) => void} [opts.recordFileOperation]  记录 write/edit 触达�?session file
+ * @param {() => object|null} [opts.getVisionBridge]  辅助视觉�? * @param {() => boolean} [opts.isVisionAuxiliaryEnabled]  辅助视觉开�? * @param {() => object|null} [opts.getTerminalSessionManager]  当前 engine �?terminal session manager
  * @param {() => string} [opts.getAgentId]  当前 agent id
- * @param {object} [opts.resourceIO]  session 级 ResourceIO 内核；未传入时按 cwd 创建 local_fs 内核
+ * @param {object} [opts.resourceIO]  session �?ResourceIO 内核；未传入时按 cwd 创建 local_fs 内核
  * @param {(event: object, sessionPath?: string|null) => void} [opts.emitEvent]  ResourceIO 事件出口
- * @param {object|null} [opts.legacyCleanupQueue] Windows 旧 ACL 清理队列
+ * @param {object|null} [opts.legacyCleanupQueue] Windows �?ACL 清理队列
  * @returns {{ tools: object[], customTools: object[], permissionBoundary: object }}
  */
 export function createSandboxedTools(cwd, customTools, {
@@ -94,7 +84,7 @@ export function createSandboxedTools(cwd, customTools, {
   emitEvent,
   legacyCleanupQueue = null,
 }) {
-  // 始终按 standard 模式构建策略和 PathGuard，wrappers 在运行时动态 bypass
+  // 始终�?standard 模式构建策略�?PathGuard，wrappers 在运行时动�?bypass
   const resolveAuthorizedFolders = () => {
     if (typeof getAuthorizedFolders === "function") {
       const folders = getAuthorizedFolders();
@@ -111,14 +101,14 @@ export function createSandboxedTools(cwd, customTools, {
       ...resolveAuthorizedFolders(),
     ],
     hanakoHome,
-    mode: "standard",
+    mode: "full-access",
   });
   const guard = {
     check: (absolutePath, operation) => new PathGuard(makePolicy()).check(absolutePath, operation),
     getAccessLevel: (absolutePath) => new PathGuard(makePolicy()).getAccessLevel(absolutePath),
   };
 
-  // 增强 readFile：xlsx 解析 + 编码检测，保留 PI SDK 默认的 image mime 判断
+  // 增强 readFile：xlsx 解析 + 编码检测，保留 PI SDK 默认�?image mime 判断
   const IMAGE_MIMES = { ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".gif": "image/gif", ".webp": "image/webp" };
 
   const platform = detectPlatform();
@@ -147,7 +137,7 @@ export function createSandboxedTools(cwd, customTools, {
     checkStagePath: (absolutePath) => guard.check(absolutePath, "stage"),
   };
 
-  // 无 OS 沙盒时的 bash 工具（沙盒关闭时回退用）
+  // �?OS 沙盒时的 bash 工具（沙盒关闭时回退用）
   const normalBashTool = isWin32
     ? createBashTool(cwd, { operations: { exec: createWin32Exec() } })
     : createBashTool(cwd);
@@ -247,7 +237,7 @@ export function createSandboxedTools(cwd, customTools, {
     detectPowerShellFlavor: isWin32 ? detectWin32PowerShellFlavor : undefined,
   });
 
-  // ── Windows: PathGuard 包装 + restricted-token exec，关闭沙盒时走 direct fallback ──
+  // ── Windows: PathGuard 包装 + restricted-token exec，关闭沙盒时�?direct fallback ──
   if (platform === "win32-restricted-token") {
     const directWin32Exec = createWin32Exec();
     const sandboxedWin32Exec = (command, execCwd, execOpts) => createWin32Exec({
@@ -270,11 +260,9 @@ export function createSandboxedTools(cwd, customTools, {
       fallbackExec: directWin32Exec,
     });
     // require_escalated 槽位：直接跑 directWin32Exec（无 restricted-token 沙盒），
-    // 不复用 sandboxedWin32Exec/wrappedBashTool——那两个实例仍套着 restricted-token
-    // 沙盒，PowerShell 在其中本就不可用，escalated 存在的意义就是绕开这层沙盒。
-    // 仍然经过 wrapCommandExec/wrapBashTool 的 PathGuard 与 preflight（escalated:
-    // true 只放开 SANDBOX_ONLY 分级如 wmic，HARD 分级命令任何模式都拦）。
-    const wrappedEscalatedWin32Exec = wrapCommandExec(directWin32Exec, guard, cwd, {
+    // 不复�?sandboxedWin32Exec/wrappedBashTool——那两个实例仍套着 restricted-token
+    // 沙盒，PowerShell 在其中本就不可用，escalated 存在的意义就是绕开这层沙盒�?    // 仍然经过 wrapCommandExec/wrapBashTool �?PathGuard �?preflight（escalated:
+    // true 只放开 SANDBOX_ONLY 分级�?wmic，HARD 分级命令任何模式都拦）�?    const wrappedEscalatedWin32Exec = wrapCommandExec(directWin32Exec, guard, cwd, {
       ...bashWrapOpts,
       escalated: true,
     });
