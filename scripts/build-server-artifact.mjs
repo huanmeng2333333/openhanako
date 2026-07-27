@@ -624,16 +624,16 @@ export async function packDualKindSeed({
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
   // ── 签 manifest，并用"将被打包的 keyset"当场 verify ──
+  let sigPath = null;
   if (signKeyPath) {
     signManifestFile({ manifestPath, signKeyPath });
-    const sigPath = `${manifestPath}.sig`;
+    sigPath = `${manifestPath}.sig`;
     if (!fs.existsSync(sigPath)) {
       throw new Error(`[build-server] manifest signing produced no signature file: ${sigPath}`);
     }
     verifyManifest(fs.readFileSync(manifestPath), fs.readFileSync(sigPath), keyset);
   } else {
     console.warn("[build-server] WARNING: Skipping manifest signing (unsigned dev build).");
-    sigPath = null;
   }
 
   log(`[build-server] seed: ${serverPack.archiveName} + ${rendererPackShared.archiveName} + ${manifestFileName}(.sig) → ${artifactOutDir}`);
