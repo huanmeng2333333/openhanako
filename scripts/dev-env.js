@@ -1,8 +1,8 @@
-import { homedir } from "node:os";
+﻿import { homedir } from "node:os";
 import { join } from "node:path";
 
 export function defaultDevHanaHome() {
-  return join(homedir(), ".hanako-dev");
+  return join(homedir(), ".ngng-dev");
 }
 
 export function applyDevEnvironment(env = process.env, {
@@ -12,3 +12,4 @@ export function applyDevEnvironment(env = process.env, {
   env.HANA_DEV_NODE_BIN = nodeBin;
   return env;
 }
+

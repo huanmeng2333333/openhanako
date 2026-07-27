@@ -1,4 +1,4 @@
-const os = require("os");
+﻿const os = require("os");
 const path = require("path");
 
 function expandHome(input, homeDir = os.homedir()) {
@@ -11,7 +11,7 @@ function expandHome(input, homeDir = os.homedir()) {
 }
 
 function resolveHanakoHome(input, homeDir = os.homedir()) {
-  const raw = input || path.join(homeDir, ".hanako");
+  const raw = input || path.join(homeDir, ".ngng");
   return path.resolve(expandHome(raw, homeDir));
 }
 
@@ -51,3 +51,4 @@ module.exports = {
   resolveHanaPiSdkRuntimeRoot,
   resolveLegacyPiSdkManagedBinDir,
 };
+
