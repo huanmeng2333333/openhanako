@@ -107,12 +107,12 @@ jobs:
           HANA_SIGN_KEY_PEM: ${{ secrets.HANA_SIGN_KEY }}
         run: |
           if [ -z "$HANA_SIGN_KEY_PEM" ]; then
-            echo "::warning::HANA_SIGN_KEY secret is missing; skipping seed signing (unsigned dev build)"
-          else
-            printf '%s\n' "$HANA_SIGN_KEY_PEM" > "$RUNNER_TEMP/hana-train-sign-key.pem"
-            echo "HANA_SIGN_KEY=$RUNNER_TEMP/hana-train-sign-key.pem" >> "$GITHUB_ENV"
-            echo "Seed signing key materialized."
+            echo "::error::HANA_SIGN_KEY secret is missing; the seed archive MUST be signed"
+            exit 1
           fi
+          printf '%s\n' "$HANA_SIGN_KEY_PEM" > "$RUNNER_TEMP/hana-train-sign-key.pem"
+          echo "HANA_SIGN_KEY=$RUNNER_TEMP/hana-train-sign-key.pem" >> "$GITHUB_ENV"
+          echo "Seed signing key materialized."
 
       # macOS: 手动配置签名 keychain + partition-list
       # electron-builder 内部也会导入证书，但不一定设 partition-list，
@@ -551,11 +551,11 @@ jobs:
           HANA_SIGN_KEY_PEM: ${{ secrets.HANA_SIGN_KEY }}
         run: |
           if [ -z "$HANA_SIGN_KEY_PEM" ]; then
-            echo "::warning::HANA_SIGN_KEY secret is missing; skipping train signing (unsigned dev build)"
-          else
-            printf '%s\n' "$HANA_SIGN_KEY_PEM" > "$RUNNER_TEMP/hana-train-sign-key.pem"
-            echo "HANA_SIGN_KEY=$RUNNER_TEMP/hana-train-sign-key.pem" >> "$GITHUB_ENV"
+            echo "::error::HANA_SIGN_KEY secret is missing; the train manifest MUST be signed"
+            exit 1
           fi
+          printf '%s\n' "$HANA_SIGN_KEY_PEM" > "$RUNNER_TEMP/hana-train-sign-key.pem"
+          echo "HANA_SIGN_KEY=$RUNNER_TEMP/hana-train-sign-key.pem" >> "$GITHUB_ENV"
 
       # The automatic publisher classifies the source installer Release before choosing
       # channels. A prerelease advances beta only; stable requires a non-prerelease source

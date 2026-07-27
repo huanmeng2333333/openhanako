@@ -1,17 +1,19 @@
 /**
- * policy.js �?沙盒策略单一来源
+ * policy.js — 沙盒策略单一来源
  *
- * 所�?ACL 常量在这里定义一份�? * PathGuard �?OS 沙盒（seatbelt/bwrap）都从这里导入�? */
+ * 所有 ACL 常量在这里定义一份。
+ * PathGuard 和 OS 沙盒（seatbelt/bwrap）都从这里导入。
+ */
 
 import path from "path";
 import { workspaceRootsForSandbox } from "../../shared/workspace-scope.ts";
 
 // ─── 常量 ─────────────────────────────────────
 
-/** hanakoHome 根级别被屏蔽的文�?*/
+/** hanakoHome 根级别被屏蔽的文件 */
 export const BLOCKED_FILES = ["auth.json", "models.json", "added-models.yaml", "crash.log"];
 
-/** hanakoHome 根级别被屏蔽的目�?*/
+/** hanakoHome 根级别被屏蔽的目录 */
 export const BLOCKED_DIRS = ["browser-data", "playwright-browsers"];
 
 /** agentDir 下只读的文件 */
@@ -25,7 +27,7 @@ export const READ_ONLY_AGENT_FILES = [
 /** hanakoHome 根级别只读的目录 */
 export const READ_ONLY_HOME_DIRS = ["user", "skills", "session-files"];
 
-/** agentDir 下可读写的目�?*/
+/** agentDir 下可读写的目录 */
 export const READ_WRITE_AGENT_DIRS = [
   "memory",
   "sessions",
@@ -36,13 +38,13 @@ export const READ_WRITE_AGENT_DIRS = [
   "avatars",
 ];
 
-/** agentDir 下只读的目录（通用机制�?skill-snapshots 已随 pointer 化移除，当前为空�?*/
+/** agentDir 下只读的目录（通用机制；.skill-snapshots 已随 pointer 化移除，当前为空） */
 export const READ_ONLY_AGENT_DIRS = [];
 
-/** agentDir 下可读写的文�?*/
+/** agentDir 下可读写的文件 */
 export const READ_WRITE_AGENT_FILES = ["pinned.md", "channels.md"];
 
-/** hanakoHome 根级别可读写的目�?*/
+/** hanakoHome 根级别可读写的目录 */
 export const READ_WRITE_HOME_DIRS = ["channels", "logs", "uploads", ".ephemeral"];
 
 export const SANDBOX_ACCESS_CONTRACT = Object.freeze({
@@ -69,7 +71,7 @@ function uniqueTruthy(paths) {
 // ─── 策略推导 ──────────────────────────────────
 
 /**
- * �?agent 配置推导沙盒策略
+ * 从 agent 配置推导沙盒策略
  *
  * @param {object} opts
  * @param {string} opts.agentDir
@@ -90,7 +92,7 @@ export function deriveSandboxPolicy({
   runtimeWritablePaths = [],
   mode,
 }) {
-  if (mode === "full-access" || true) {
+  if (mode === "full-access") {
     return { mode: "full-access" };
   }
   const workspaceRoots = uniqueTruthy([
@@ -117,13 +119,15 @@ export function deriveSandboxPolicy({
     ].filter(Boolean),
 
     // macOS/Linux OS 沙盒仍使用显式只读路径。Windows restricted-token
-    // 后端按当前用户权限自然读取，不再把读权限投影�?ACL grant�?    readablePaths: [
+    // 后端按当前用户权限自然读取，不再把读权限投影成 ACL grant。
+    readablePaths: [
       ...READ_ONLY_AGENT_FILES.map((f) => path.join(agentDir, f)),
       ...READ_ONLY_AGENT_DIRS.map((d) => path.join(agentDir, d)),
       ...READ_ONLY_HOME_DIRS.map((d) => path.join(hanakoHome, d)),
     ].filter(Boolean),
 
-    // OS 沙盒用：拒绝读取（文�?+ 目录�?    denyReadPaths: [
+    // OS 沙盒用：拒绝读取（文件 + 目录）
+    denyReadPaths: [
       ...BLOCKED_FILES.map((f) => path.join(hanakoHome, f)),
       ...BLOCKED_DIRS.map((d) => path.join(hanakoHome, d)),
     ],

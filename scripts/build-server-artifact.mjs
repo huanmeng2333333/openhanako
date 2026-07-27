@@ -293,8 +293,12 @@ export function resolveBuildKeyset(env) {
 function requireSignKeyPath(env) {
   const signKeyPath = env.HANA_SIGN_KEY;
   if (!signKeyPath) {
-    console.warn("[build-server] WARNING: HANA_SIGN_KEY not set. Building unsigned seed (dev build).");
-    return null;
+    throw new Error(
+      "[build-server] HANA_SIGN_KEY is not set. The installer seed MUST be signed; "
+        + "building an unsigned seed is not a thing. Set HANA_SIGN_KEY=<private-key-path> "
+        + "(local validation: generate a throwaway pair with scripts/artifact-keygen.mjs "
+        + "and point HANA_SIGN_KEYSET at its matching keyset file).",
+    );
   }
   if (!fs.existsSync(signKeyPath)) {
     throw new Error(`[build-server] HANA_SIGN_KEY points at a missing file: ${signKeyPath}`);
@@ -624,17 +628,12 @@ export async function packDualKindSeed({
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 
   // ── 签 manifest，并用"将被打包的 keyset"当场 verify ──
-  let sigPath = null;
-  if (signKeyPath) {
-    signManifestFile({ manifestPath, signKeyPath });
-    sigPath = `${manifestPath}.sig`;
-    if (!fs.existsSync(sigPath)) {
-      throw new Error(`[build-server] manifest signing produced no signature file: ${sigPath}`);
-    }
-    verifyManifest(fs.readFileSync(manifestPath), fs.readFileSync(sigPath), keyset);
-  } else {
-    console.warn("[build-server] WARNING: Skipping manifest signing (unsigned dev build).");
+  signManifestFile({ manifestPath, signKeyPath });
+  const sigPath = `${manifestPath}.sig`;
+  if (!fs.existsSync(sigPath)) {
+    throw new Error(`[build-server] manifest signing produced no signature file: ${sigPath}`);
   }
+  verifyManifest(fs.readFileSync(manifestPath), fs.readFileSync(sigPath), keyset);
 
   log(`[build-server] seed: ${serverPack.archiveName} + ${rendererPackShared.archiveName} + ${manifestFileName}(.sig) → ${artifactOutDir}`);
   return {
